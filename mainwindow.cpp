@@ -12,6 +12,9 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <QFile>
+#include <QFileInfo>
+#include <QFileInfoList>
 
 
 using namespace std;
@@ -42,46 +45,60 @@ void MainWindow::on_actionNew_Window_2_triggered() //click a new window in menu
 }
 
 
-QString get_search_word(QString search_path, string search_word){
+stack<QString> get_search_word(QString search_path, QString search_word){
     //for each path in current_file_path
-    QString file_path_string = "";
-    stack<QString> stack_of_files;
-    QDir start_path = QDir(search_path);
-    if(!start_path.exists()){
-        QFile q_file = QFile(search_path);
+    QString temp_path; //holds temporal paths variable for looping through
+    QString file_path_string = "testing purpose"; //Print f testing purposes
+    stack<stack<QString>> stack_of_stacks;
+    stack<QString> stack_of_files; //a stack that holds all file paths containing directory or file of search word
+    QDir start_path = QDir(search_path); //Initialize directory object to investigated directories content
+    if(!start_path.exists()){ // if the initialized directory is not a directory, check if it is a file
+        QFile q_file(search_path); //initiliaze file object to investigate file
         if(q_file.exists()){
-            QString file_name = q_file.fileName();
-            if(file_name.find(search_word)){
-                return fil
+           QString file_name = q_file.fileName(); //get file name
+           if(file_name.contains(search_word, Qt::CaseInsensitive)){ // check if file name contains search_word
+               stack_of_files.push(start_path.filePath(file_name)); // push it's path into stack
+               return stack_of_files;
             }
         }
     }
-    else if(start_path.exists()){
+    else if(start_path.exists()){ // if initialize directory is a directory
+        QFileInfoList entries = start_path.entryInfoList(QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot); // filter out its subdirectory for only files and folders
+        for(int entry = 0; entry < entries.size(); entry++){ //loop through each subdirectories
+            QFileInfo fileInfo = entries.at(entry); //get the directory/file of each of its subdirectory by index
+            temp_path = fileInfo.filePath(); // get that subdirectory file/folder path
+            QDir check_dir = QDir(temp_path); // initialize a directory object for that subdirectory to investigate its content
+            if(fileInfo.isDir() && (check_dir.dirName() != "OS X Install Data")) // if subdirectory is a directory
+            {
+                stack_of_stacks.push(get_search_word(temp_path, search_word)); // recursively call get_search_word and add it to stack_of_files
+                //stack_of_files.push(temp_path);
+                //return stack_of_files;
+            }
+            else if(fileInfo.isFile()){
+              QFile q_file(fileInfo.filePath());//use fileInfo.filePath
+              QString file_name = q_file.fileName();
+              if(file_name.contains(search_word, Qt::CaseInsensitive)){
+                    stack_of_files.push(file_name);
+                    return stack_of_files;
+               }
+            }
+        }
+ }
 
-    }
-    QStringList entries = start_path.entryList();
-    for(int entry = 0; entry < entries.size(); entry++){
-        //stack_of_files.push(entries.at(entry));
-        //
-        if()
-    }
-    int count = static_cast<int>(stack_of_files.size());
+    int count = static_cast<int>(stack_of_stacks.size());
 
     for(int start = 0; start < count; start++)
     {
-      file_path_string = file_path_string + stack_of_files.top();
-      stack_of_files.pop();
+      stack<QString> temp_stack = stack_of_stacks.top(); //use copy
+      int stack_count = static_cast<int>(temp_stack.size());
+      stack_of_stacks.pop();
+      for(int stacks_count = 0; stacks_count < stack_count; stacks_count++){
+          stack_of_files.push(temp_stack.top());
+          temp_stack.pop();
+      }
     }
-
-    return file_path_string;
-    //if that path is a file:
-      //check if it contains "search_word"
-         // add path string to list_of_path arrays
-            // continue
-       // else if path is a directory:
-                // call get_search_word(on that path)
- }
-
+    return stack_of_files;
+}
 void MainWindow::on_searchButton_clicked()
 {
     QFileSystemModel *dirmodel = new QFileSystemModel(this);
@@ -89,12 +106,14 @@ void MainWindow::on_searchButton_clicked()
     ui->treeView->setModel(dirmodel);
     ui->treeView->setRootIndex(dirmodel->index("~/"));
     QString root = QDir::rootPath();
-    //QString string_stack = get_search_word(root);
-    //QString file_path_string = stack_of_files.top();
+    QString new_string = "Financial";
+    stack<QString> new_stack (get_search_word(root, new_string));
+    //QString string_stack = get_search_word(root, new_string);
+    QString file_path_string = new_stack.top();
     //for(int start = 0; start < 1; start++){
         //file_path_string = file_path_string;
     //}
-    ui->fileView->setText("file_path_string");
-    ui->searchBar->setText(string_stack);
+    ui->fileView->setText(file_path_string);
+    //ui->searchBar->setText("works");
 
 }
