@@ -75,7 +75,7 @@ stack<QString> get_search_word(QString search_path, QString search_word){
             QFileInfo fileInfo = entries.at(entry); //get the directory/file of each of its subdirectory by index
             temp_path = fileInfo.filePath(); // get that subdirectory file/folder path
             QDir check_dir = QDir(temp_path); // initialize a directory object for that subdirectory to investigate its content
-            if(fileInfo.isDir() && check_dir.dirName().contains("Financial")) // if subdirectory is a directory
+            if(fileInfo.isDir()) // if subdirectory is a directory
             {
                 //#pragma omp task
                 stack_of_stacks.push(get_search_word(temp_path, search_word)); // recursively call get_search_word and add it to stack_of_files
@@ -108,9 +108,9 @@ stack<QString> get_search_word(QString search_path, QString search_word){
     return stack_of_files;
 }
 
-void displayFilePaths(stack<QString> stackOfFiles, Ui::MainWindow * ui){
+void MainWindow::displayFilePaths(stack<QString> stackOfFiles, Ui::MainWindow * ui){
     int count = static_cast<int>(stackOfFiles.size());
-    QStringListModel *list_view_model = new QStringListModel();
+    list_view_model = new QStringListModel(this);
     QString file_path;
     QStringList list_of_paths;
     for(int start = 0; start < count; start++){
@@ -124,21 +124,21 @@ void displayFilePaths(stack<QString> stackOfFiles, Ui::MainWindow * ui){
 
 void MainWindow::on_searchButton_clicked()
 {
-    QFileSystemModel *dirmodel = new QFileSystemModel(this);
+    dirmodel = new QFileSystemModel(this);
     dirmodel->setRootPath("~/");
     ui->treeView->setModel(dirmodel);
     ui->treeView->setRootIndex(dirmodel->index("~/"));
-    QString root = QDir::rootPath();
-    stack<QString> new_stack (get_search_word(root, ui->searchBar->text()));
+    QDir root = QDir("/Financial");
+    QString root_path = root.absolutePath();
+    stack<QString> new_stack (get_search_word(root_path, ui->searchBar->text()));
     displayFilePaths(new_stack, ui);
 }
-/*
-void MainWindow::on_openFileButton_clicked()
+
+void MainWindow::on_fileView_clicked(const QModelIndex &index)
 {
-    QModelIndexList selected_item = ui->fileView->selectedIndexes();
-    QString s
+    QString click_path = index.model()->data(index, Qt::DisplayRole).toString();
+
     QString fileName = QFileDialog::getOpenFileName(
-                this, tr("Open File"),"~/","All files (*.*);;Text File (*.txt);;Music file(*.mp3)"
+                this, tr("Open File"),click_path,"All files (*.*);;Text File (*.txt);;Music file(*.mp3)"
                 );
 }
-*/
