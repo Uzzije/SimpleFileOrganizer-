@@ -11,6 +11,7 @@
 #include <QStringListModel>
 #include <QListView>
 #include <QtGlobal>
+#include <QAbstractItemModel>
 #include <QTreeView>
 #include <QListView>
 #include <QtWidgets>
@@ -198,4 +199,15 @@ void MainWindow::on_searchButton_clicked()
     // ui->fileView->setText( file_path_string );
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+}
+
+void MainWindow::on_folderCreateButton_clicked()
+{
+    QAbstractItemModel *list_view_model = ui->fileView->model();
+    QStringList list_of_paths;
+    foreach (QString file_path, list_view_model) {
+        list_of_paths.append(file_path);
+    }
+    MyDialogue dial;
+    dial.show();
 }

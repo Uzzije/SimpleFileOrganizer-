@@ -13,7 +13,12 @@ MyDialogue::~MyDialogue()
     delete ui;
 }
 
-void MyDialogue::on_pushButton_2_clicked()
+void MyDialogue::on_okButton_clicked()
+{
+
+}
+
+void MyDialogue::on_cancelButton_clicked()
 {
 
 }

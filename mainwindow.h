@@ -31,7 +31,9 @@ private slots:
 
     //void on_openFileButton_clicked();
 
+
     void on_fileView_clicked(const QModelIndex &index);
+    void on_folderCreateButton_clicked();
 
 private:
     Ui::MainWindow *ui;

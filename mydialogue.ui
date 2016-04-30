@@ -16,27 +16,27 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>10</x>
      <y>30</y>
-     <width>59</width>
+     <width>81</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>Name</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Folder Name:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEdit">
    <property name="geometry">
     <rect>
-     <x>80</x>
+     <x>100</x>
      <y>30</y>
      <width>321</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="cancelButton">
    <property name="geometry">
     <rect>
      <x>260</x>
@@ -49,7 +49,7 @@
     <string>Cancel</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="okButton">
    <property name="geometry">
     <rect>
      <x>120</x>
@@ -66,7 +66,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>pushButton_2</sender>
+   <sender>okButton</sender>
    <signal>clicked()</signal>
    <receiver>MyDialogue</receiver>
    <slot>accept()</slot>
@@ -82,7 +82,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton</sender>
+   <sender>cancelButton</sender>
    <signal>clicked()</signal>
    <receiver>MyDialogue</receiver>
    <slot>reject()</slot>
