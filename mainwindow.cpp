@@ -88,7 +88,7 @@ stack<QString> get_search_word(QString search_path, QString search_word){
 
               if(file_name.contains(search_word, Qt::CaseInsensitive)){
                     stack_of_files.push(fileInfo.filePath());
-                    //return stack_of_files;
+                    return stack_of_files;
                }
             }
         }
