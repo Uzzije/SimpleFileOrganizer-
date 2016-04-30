@@ -24,4 +24,3 @@ FORMS    += mainwindow.ui \
 
 
 
-
