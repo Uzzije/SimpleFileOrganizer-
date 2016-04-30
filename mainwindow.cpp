@@ -75,7 +75,7 @@ stack<QString> get_search_word(QString search_path, QString search_word){
             QFileInfo fileInfo = entries.at(entry); //get the directory/file of each of its subdirectory by index
             temp_path = fileInfo.filePath(); // get that subdirectory file/folder path
             QDir check_dir = QDir(temp_path); // initialize a directory object for that subdirectory to investigate its content
-            if(fileInfo.isDir() && check_dir.dirName().contains("Financial")) // if subdirectory is a directory
+            if(fileInfo.isDir()) // if subdirectory is a directory
             {
                 //#pragma omp task
                 stack_of_stacks.push(get_search_word(temp_path, search_word)); // recursively call get_search_word and add it to stack_of_files
@@ -88,7 +88,7 @@ stack<QString> get_search_word(QString search_path, QString search_word){
 
               if(file_name.contains(search_word, Qt::CaseInsensitive)){
                     stack_of_files.push(fileInfo.filePath());
-                    //return stack_of_files;
+                    return stack_of_files;
                }
             }
         }
@@ -128,7 +128,7 @@ void MainWindow::on_searchButton_clicked()
     dirmodel->setRootPath("~/");
     ui->treeView->setModel(dirmodel);
     ui->treeView->setRootIndex(dirmodel->index("~/"));
-    QString root = QDir::rootPath();
+    QString root = dirmodel->rootPath();// QDir::rootPath();
     stack<QString> new_stack (get_search_word(root, ui->searchBar->text()));
     displayFilePaths(new_stack, ui);
 }
