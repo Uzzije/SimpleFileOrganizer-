@@ -36,6 +36,9 @@
     <property name="text">
      <string>Search</string>
     </property>
+    <property name="shortcut">
+     <string>Return</string>
+    </property>
    </widget>
    <widget class="QTreeView" name="treeView">
     <property name="geometry">
@@ -47,12 +50,12 @@
      </rect>
     </property>
    </widget>
-   <widget class="QTextEdit" name="fileView">
+   <widget class="QListView" name="fileView">
     <property name="geometry">
      <rect>
-      <x>493</x>
-      <y>110</y>
-      <width>411</width>
+      <x>495</x>
+      <y>111</y>
+      <width>421</width>
       <height>421</height>
      </rect>
     </property>
@@ -64,7 +67,7 @@
      <x>0</x>
      <y>0</y>
      <width>928</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
