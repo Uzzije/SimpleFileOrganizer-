@@ -152,7 +152,7 @@ void createFolder( stack<QString> files, QDir dir )
     QStringList list;
     int index, i = 1;
  
-    dest = "C:/AAA"; //update to get path from UI 
+    dest = "~/"; //update to get path from UI
     
     while( !dir.mkdir( dest ) )
     {
@@ -184,16 +184,16 @@ void MainWindow::on_searchButton_clicked()
     double time_spent;
     
     dirmodel = new QFileSystemModel( this );
-    dirmodel->setRootPath( "C:/TEST/" );
+    dirmodel->setRootPath( "/Financial" );
     ui->treeView->setModel( dirmodel );
-    ui->treeView->setRootIndex( dirmodel->index( "C:/TEST/" ) );
+    ui->treeView->setRootIndex( dirmodel->index( "~/" ) );
     root = dirmodel->rootPath();
     
     stack<QString> new_stack( get_search_word( root, ui->searchBar->text() ) );
     
     displayFilePaths(new_stack, ui);
     dir = dirmodel->rootPath(); //update to use UI path user chooses
-    createFolder( new_stack, dir );
+    //createFolder( new_stack, dir );
     
     // ui->fileView->setText( file_path_string );
     end = clock();
