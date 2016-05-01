@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -76,7 +77,8 @@ stack<QString> get_search_word( QString search_path, QString search_word )
     }
     else if( start_path.exists() ) // if initialize directory is a directory
     {    
-        QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir                                                 ::NoDotAndDotDot ); // filter out its subdirectory for only files and folders        
+        QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot ); // filter out its subdirectory for only files and folders
+
         for( int entry = 0; entry < entries.size(); entry++ ) //loop through each subdirectories
         {
             QFileInfo fileInfo = entries.at( entry ); //get the directory/file of each of its subdirectory by index
@@ -105,7 +107,7 @@ stack<QString> get_search_word( QString search_path, QString search_word )
 
     int count = static_cast<int>( stack_of_stacks.size() );
 
-
+    #pragma omp for
     for( int start = 0; start < count; start++ )
     {
         stack<QString> temp_stack = stack_of_stacks.top(); //use copy

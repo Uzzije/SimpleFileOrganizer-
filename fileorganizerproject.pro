@@ -14,13 +14,16 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    mydialogue.cpp
+    mydialogue.cpp \
+    optthread.cpp
 
 HEADERS  += mainwindow.h \
-    mydialogue.h
+    mydialogue.h \
+    optthread.h
 
 FORMS    += mainwindow.ui \
     mydialogue.ui
 
-
-
+QMAKE_CXXFLAGS += -fopenmp
+QMAKE_LFLAGS +=  -fopenmp
+QMAKE_CFLAGS_DEBUG += -fopenmp
