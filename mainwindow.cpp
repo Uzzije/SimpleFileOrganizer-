@@ -77,7 +77,7 @@ stack<QString> get_search_word( QString search_path, QString search_word )
     }
     else if( start_path.exists() ) // if initialize directory is a directory
     {    
-        QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir                                                 ::NoDotAndDotDot ); // filter out its subdirectory for only files and folders        
+        QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot ); // filter out its subdirectory for only files and folders
         for( int entry = 0; entry < entries.size(); entry++ ) //loop through each subdirectories
         {
             QFileInfo fileInfo = entries.at( entry ); //get the directory/file of each of its subdirectory by index
@@ -129,6 +129,7 @@ void MainWindow::on_fileView_clicked(const QModelIndex &index)
                 this, tr("Open File"),click_path,"All files (*.*);;Text File (*.txt);;Music file(*.mp3)"
                 );
 }
+
 void MainWindow::displayFilePaths(stack<QString> stackOfFiles, Ui::MainWindow * ui)
 {
     QString file_path;
@@ -147,13 +148,13 @@ void MainWindow::displayFilePaths(stack<QString> stackOfFiles, Ui::MainWindow * 
     ui->fileView->setModel( list_view_model );
 }
 
-void createFolder( stack<QString> files, QDir dir )
+void createFolder( stack<QString> files, QDir dir, QString destination )
 {
     QString src, dest, file_name, file_num;
     QStringList list;
     int index, i = 1;
- 
-    dest = "~/"; //update to get path from UI
+
+    dest = destination; //update to get path from UI
     
     while( !dir.mkdir( dest ) )
     {
@@ -172,7 +173,7 @@ void createFolder( stack<QString> files, QDir dir )
         files.pop();
         list = src.split( "/" );
         file_name = list[ list.size() - 1 ];
-        QFile::copy( src, dest + "/" + file_name );
+        QFile::copy(src, dir.absoluteFilePath(dest) + "/" + file_name );
     }
 }
 
@@ -185,13 +186,13 @@ void MainWindow::on_searchButton_clicked()
     double time_spent;
     
     dirmodel = new QFileSystemModel( this );
-    dirmodel->setRootPath( "/Financial" );
+    dirmodel->setRootPath( "/testFolder" );
     ui->treeView->setModel( dirmodel );
     ui->treeView->setRootIndex( dirmodel->index( "~/" ) );
     root = dirmodel->rootPath();
     
     stack<QString> new_stack( get_search_word( root, ui->searchBar->text() ) );
-    
+    global_stack = new_stack;
     displayFilePaths(new_stack, ui);
     dir = dirmodel->rootPath(); //update to use UI path user chooses
     //createFolder( new_stack, dir );
@@ -201,13 +202,17 @@ void MainWindow::on_searchButton_clicked()
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 }
 
+// the "create folder" button upon click pop up a dialogue, for user enters name of folder
 void MainWindow::on_folderCreateButton_clicked()
 {
-    QAbstractItemModel *list_view_model = ui->fileView->model();
-    QStringList list_of_paths;
-    foreach (QString file_path, list_view_model) {
-        list_of_paths.append(file_path);
-    }
-    MyDialogue dial;
+    MyDialogue dial(this);
     dial.show();
+}
+
+void MainWindow::on_treeView_doubleClicked(const QModelIndex &index)
+{
+    QString new_folder_path = dirmodel->fileInfo(index).absoluteFilePath();
+    stack<QString> folder_stack (global_stack);
+    QString folderName = "TestName";
+    createFolder(folder_stack, new_folder_path, folderName);
 }

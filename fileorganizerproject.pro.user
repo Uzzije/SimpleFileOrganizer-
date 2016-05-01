@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<<<<<<< Updated upstream
-<!-- Written by QtCreator 3.6.1, 2016-04-30T18:25:39. -->
-=======
-<!-- Written by QtCreator 3.6.1, 2016-04-30T18:37:57. -->
->>>>>>> Stashed changes
+<!-- Written by QtCreator 3.6.1, 2016-05-01T13:28:55. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -129,11 +125,7 @@
     <value type="bool" key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.1">
-<<<<<<< Updated upstream
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/Users/Administrator/Desktop/CIS 625/build-fileorganizerproject-GCC_5-Release</value>
-=======
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/Users/Austin03/Desktop/GitHub/build-fileorganizerproject-Desktop_Qt_5_6_0_clang_64bit-Release</value>
->>>>>>> Stashed changes
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -193,11 +185,7 @@
     <value type="bool" key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.2">
-<<<<<<< Updated upstream
-    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/Users/Administrator/Desktop/CIS 625/build-fileorganizerproject-GCC_5-Profile</value>
-=======
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">/Users/Austin03/Desktop/GitHub/build-fileorganizerproject-Desktop_Qt_5_6_0_clang_64bit-Profile</value>
->>>>>>> Stashed changes
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>

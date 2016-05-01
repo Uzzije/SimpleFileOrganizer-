@@ -16,8 +16,6 @@ public:
     ~MyDialogue();
 
 private slots:
-    void on_pushButton_2_clicked();
-
     void on_okButton_clicked();
 
     void on_cancelButton_clicked();

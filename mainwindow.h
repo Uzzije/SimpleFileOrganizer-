@@ -33,13 +33,17 @@ private slots:
 
 
     void on_fileView_clicked(const QModelIndex &index);
+
     void on_folderCreateButton_clicked();
+
+    void on_treeView_doubleClicked(const QModelIndex &index);
 
 private:
     Ui::MainWindow *ui;
     MyDialogue *myDialogue;
     QStringListModel *list_view_model;
     QFileSystemModel *dirmodel;
+    std::stack<QString> global_stack;
 };
 
 #endif // MAINWINDOW_H
