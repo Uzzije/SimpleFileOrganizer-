@@ -24,6 +24,6 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui \
     mydialogue.ui
 
-QMAKE_CXXFLAGS += -fopenmp
-QMAKE_LFLAGS +=  -fopenmp
+#QMAKE_CXXFLAGS += -fopenmp
+#QMAKE_LFLAGS +=  -fopenmp
 QMAKE_CFLAGS_DEBUG += -fopenmp
