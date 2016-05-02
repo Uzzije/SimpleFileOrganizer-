@@ -36,8 +36,6 @@ private slots:
 
     void on_folderCreateButton_clicked();
 
-    void on_treeView_doubleClicked(const QModelIndex &index);
-
 private:
     Ui::MainWindow *ui;
     MyDialogue *myDialogue;

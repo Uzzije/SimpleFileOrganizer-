@@ -29,6 +29,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <QtConcurrent/QtConcurrent>
+
 using namespace std;
 
 MainWindow::MainWindow( QWidget *parent ) :
@@ -36,6 +38,11 @@ MainWindow::MainWindow( QWidget *parent ) :
     ui( new Ui::MainWindow )
 {
     ui->setupUi( this );
+
+    dirmodel = new QFileSystemModel( this );
+    dirmodel->setRootPath( "~/" );
+    ui->treeView->setModel( dirmodel );
+    ui->treeView->setRootIndex( dirmodel->index( "~/" ) );
 
     //connect(ui->horizontalSlider,SIGNAL(valueChanged(int)),
             //ui->progressBar, SLOT(setValue(int)));
@@ -178,20 +185,26 @@ void createFolder( stack<QString> files, QDir dir, QString destination )
 }
 
 void MainWindow::on_searchButton_clicked()
-{
+{        
     clock_t begin = clock(), end;
     QDir dir;
-    QString string, root;
+    QString string, path;
+    QModelIndexList file_index;
     QMessageBox msgBox;
     double time_spent;
+
+    if( ui->searchBar->text() == "" )
+    {
+        msgBox.setText( "Enter a string to search for!" );
+        msgBox.exec();
+        return;
+    }
+
+    file_index = ui->treeView->selectionModel()->selectedIndexes();
+    path = dirmodel->filePath( file_index[ 0 ] );
     
-    dirmodel = new QFileSystemModel( this );
-    dirmodel->setRootPath( "/testFolder" );
-    ui->treeView->setModel( dirmodel );
-    ui->treeView->setRootIndex( dirmodel->index( "~/" ) );
-    root = dirmodel->rootPath();
-    
-    stack<QString> new_stack( get_search_word( root, ui->searchBar->text() ) );
+    stack<QString> new_stack( get_search_word( path, ui->searchBar->text() ) );
+    ui->searchBar_2->setEnabled(true);
     global_stack = new_stack;
     displayFilePaths(new_stack, ui);
     dir = dirmodel->rootPath(); //update to use UI path user chooses
@@ -205,14 +218,18 @@ void MainWindow::on_searchButton_clicked()
 // the "create folder" button upon click pop up a dialogue, for user enters name of folder
 void MainWindow::on_folderCreateButton_clicked()
 {
-    MyDialogue dial(this);
-    dial.show();
-}
-
-void MainWindow::on_treeView_doubleClicked(const QModelIndex &index)
-{
-    QString new_folder_path = dirmodel->fileInfo(index).absoluteFilePath();
+    QString new_folder_path;
+    QMessageBox msgBox;
     stack<QString> folder_stack (global_stack);
-    QString folderName = "TestName";
+    QString folderName = ui->searchBar_2->text();
+    if( folderName == "" )
+    {
+        msgBox.setText( "No folder name entered. Default folder name is 'file_search_results'." );
+        msgBox.exec();
+        folderName = "file_search_results";
+    }
+    QModelIndexList pathIndexList = ui->treeView->selectionModel()->selectedIndexes();
+    new_folder_path = dirmodel->filePath( pathIndexList[ 0 ] );
     createFolder(folder_stack, new_folder_path, folderName);
+    ui->searchBar_2->setText( "" );
 }
