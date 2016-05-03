@@ -28,8 +28,14 @@
 #include <stdlib.h>
 #include <time.h>
 #include <omp.h>
-
+#include "optthread.h"
+#include <QFuture>
+#include <QtConcurrent/QtConcurrent>
 using namespace std;
+
+
+
+QString seconds = "not in stack";
 
 MainWindow::MainWindow( QWidget *parent ) :
     QMainWindow( parent ),
@@ -55,7 +61,12 @@ void MainWindow::on_actionNew_Window_2_triggered() //click a new window in menu
     MyDialogue MyDialogue( this );
     myDialogue->show();
 }
-
+void MainWindow::add_to_stack(stack<QString> name){
+    global_stack = name;
+    global_stack.push("testing");
+    seconds = "In add stack";
+}
+/*
 stack<QString> get_search_word( QString search_path, QString search_word )
 {
     QString temp_path; //holds temporal paths variable for looping through
@@ -71,57 +82,60 @@ stack<QString> get_search_word( QString search_path, QString search_word )
             if( file_name.contains( search_word, Qt::CaseInsensitive ) ) // check if file name contains search_word
             {
                 stack_of_files.push( start_path.filePath( file_name ) ); // push it's path into stack
-                return stack_of_files;
+                return stack_of_files; // change this to emit
             }
         }
     }
     else if( start_path.exists() ) // if initialize directory is a directory
-    {    
-        QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot ); // filter out its subdirectory for only files and folders
-
-        for( int entry = 0; entry < entries.size(); entry++ ) //loop through each subdirectories
-        {
-            QFileInfo fileInfo = entries.at( entry ); //get the directory/file of each of its subdirectory by index
-            temp_path = fileInfo.filePath(); // get that subdirectory file/folder path
-            QDir check_dir = QDir( temp_path ); // initialize a directory object for that subdirectory to investigate its content
-            if( fileInfo.isDir() ) // if subdirectory is a directory
-            {
-                temp_stack = get_search_word( temp_path, search_word );
-                if ( temp_stack.size() != 0 )
-                    stack_of_stacks.push( temp_stack ); // recursively call get_search_word and add it to stack_of_files
-                //stack_of_files.push(temp_path);
-                //return stack_of_files;
-            }
-            else if( fileInfo.isFile() )
-            {
-                QFile q_file( fileInfo.filePath() );//use fileInfo.filePath
-                QString file_name = q_file.fileName();
-                if( file_name.contains( search_word, Qt::CaseInsensitive ) )
-                {
-                    stack_of_files.push( file_name );
-                    //return stack_of_files;
+    {
+       QString old_path = search_path;
+       stack<QString> track_of_files;
+       stack<int> track_of_index_searched;
+       QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot ); // filter out its subdirectory for only files and folders
+       track_of_files.push(entries.at(0).filePath());
+       int start = 0;
+       QFileInfoList temp_entries = entries;
+       int count = -1;
+            while(count != 0){
+                for(;start <temp_entries.size(); start++){
+                    QFileInfo tempInfo = temp_entries.at(start);
+                    QString tempFilePath = tempInfo.filePath();
+                    QDir check_dir = QDir( tempFilePath );
+                    if(tempInfo.isDir()){
+                        track_of_files.push(old_path);
+                        old_path = tempFilePath;
+                        track_of_index_searched.push(start+1);
+                        start = -1;
+                        temp_entries = check_dir.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot );
+                    }
+                    else if( tempInfo.isFile() )
+                    {
+                        QFile q_file( tempInfo.filePath() );//use fileInfo.filePath
+                        QString file_name = q_file.fileName();
+                        if( file_name.contains( search_word, Qt::CaseInsensitive ) )
+                        {
+                            stack_of_files.push( check_dir.filePath( file_name ) );
+                            //return stack_of_files;
+                        }
+                    }
+                }
+                int go_back_count = static_cast<int>( track_of_files.size() );
+                if(go_back_count != 1){
+                    QString tempFilePath_back = track_of_files.top();
+                    QDir check_dir_back = QDir( tempFilePath_back );
+                    temp_entries = check_dir_back.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot );
+                    track_of_files.pop();
+                    start = track_of_index_searched.top();
+                    track_of_index_searched.pop();
+                }
+                else if(go_back_count == 1){
+                    count = 0;
                 }
             }
         }
-    }
-
-    int count = static_cast<int>( stack_of_stacks.size() );
-
-    #pragma omp for
-    for( int start = 0; start < count; start++ )
-    {
-        stack<QString> temp_stack = stack_of_stacks.top(); //use copy
-        int stack_count = static_cast<int>( temp_stack.size() );
-        stack_of_stacks.pop();
-        for( int stacks_count = 0; stacks_count < stack_count; stacks_count++ )
-        {
-            stack_of_files.push( temp_stack.top() );
-            temp_stack.pop();
-        }
-    }
     return stack_of_files;
 }
-
+*/
 void MainWindow::on_fileView_clicked(const QModelIndex &index)
 {
     QString click_path = index.model()->data(index, Qt::DisplayRole).toString();
@@ -184,20 +198,28 @@ void MainWindow::on_searchButton_clicked()
     QString string, root;
     QMessageBox msgBox;
     double time_spent;
-    
     dirmodel = new QFileSystemModel( this );
-    dirmodel->setRootPath( "/Financial" );
+    dirmodel->setRootPath( "/" );
     ui->treeView->setModel( dirmodel );
-    ui->treeView->setRootIndex( dirmodel->index( "~/" ) );
+    ui->treeView->setRootIndex( dirmodel->index( "/" ) );
+
     root = dirmodel->rootPath();
-    
-    stack<QString> new_stack( get_search_word( root, ui->searchBar->text() ) );
-    
+    qRegisterMetaType<stack<QString>>();
+    connect(&ptjob, &optThread::on_find, this, &MainWindow::add_to_stack);
+
+    //QDir start_path = QDir( root );
+    //QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot );
+
+    QFuture<void> test;
+    QString search_word = ui->searchBar->text();
+
+    test = QtConcurrent::run(&this->ptjob, &optThread::start, root, search_word);
+    test.waitForFinished();
+
+    ui->searchBar->setText("Running.." + seconds);
+    stack<QString> new_stack = global_stack ;
     displayFilePaths(new_stack, ui);
-    dir = dirmodel->rootPath(); //update to use UI path user chooses
-    //createFolder( new_stack, dir );
-    
-    // ui->fileView->setText( file_path_string );
+
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 }
