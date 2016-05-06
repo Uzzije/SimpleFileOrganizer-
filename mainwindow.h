@@ -49,6 +49,7 @@ private:
     optThread *ptThread_1;
     QThread *main_thread;
     QThread *main2_thread;
+    optThread *ptThread_2;
 };
 
 #endif // MAINWINDOW_H

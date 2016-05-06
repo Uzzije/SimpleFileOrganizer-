@@ -48,18 +48,30 @@ MainWindow::MainWindow( QWidget *parent ) :
     ptThread_0 = new optThread();
     ptThread_1 = new optThread();
     main_thread = new QThread();
-    //main2_thread = new QThread();
+    ptThread_2 = new optThread();
     ptThread_0->moveToThread(main_thread);
     ptThread_1->moveToThread(main_thread);
+    ptThread_2->moveToThread(main_thread);
     qRegisterMetaType<std::stack<QString>>();
     connect(ptThread_0, SIGNAL(workRequested()), main_thread, SLOT(start()));
     connect(ptThread_0, SIGNAL(ReturnStackOfFiles(std::stack<QString>)), this, SLOT(update_global_path(std::stack<QString>)));
     connect(main_thread, SIGNAL(started()), ptThread_0, SLOT(doWork()));
     connect(ptThread_0, SIGNAL(finished()), main_thread, SLOT(quit()), Qt::DirectConnection);
+
     connect(ptThread_1, SIGNAL(workRequested()), main_thread, SLOT(start()));
     connect(ptThread_1, SIGNAL(ReturnStackOfFiles(std::stack<QString>)), this, SLOT(update_global_path(std::stack<QString>)));
     connect(main_thread, SIGNAL(started()), ptThread_1, SLOT(doWork()));
     connect(ptThread_1, SIGNAL(finished()), main_thread, SLOT(quit()), Qt::DirectConnection);
+
+    connect(ptThread_2, SIGNAL(workRequested()), main_thread, SLOT(start()));
+    connect(ptThread_2, SIGNAL(ReturnStackOfFiles(std::stack<QString>)), this, SLOT(update_global_path(std::stack<QString>)));
+    connect(main_thread, SIGNAL(started()), ptThread_2, SLOT(doWork()));
+    connect(ptThread_2, SIGNAL(finished()), main_thread, SLOT(quit()), Qt::DirectConnection);
+
+    dirmodel = new QFileSystemModel( this );
+    dirmodel->setRootPath( "/Financial" );
+    ui->treeView->setModel( dirmodel );
+    ui->treeView->setRootIndex( dirmodel->index( "~/" ) );
 }
 
 QStringList path_start_end(int index){
@@ -208,37 +220,36 @@ void MainWindow::on_searchButton_clicked()
     QMessageBox msgBox;
     double time_spent;
     global_path = QDir::rootPath();//QDir::rootPath();
-    QString global_path2 = "/Financial";
+    QString global_path2 = "/Users/Administrator/Desktop/CIS 625";
     set_up_thread( global_path );
     QString begin_search = path_start_end(0)[0];
     QString end_search = path_start_end(0)[1];
-    QString begin_search_1 = path_start_end(1)[0];
-    QString end_search_1 = path_start_end(1)[1];
+    //QString begin_search_1 = path_start_end(1)[0];
+    //QString end_search_1 = path_start_end(1)[1];
     ptThread_0->start_path_of_file = begin_search;
     ptThread_0->end_path_of_file = end_search;
-    ptThread_0->head_dir = global_path;
+    ptThread_0->head_dir = global_path2;
     ptThread_0->string_word = ui->searchBar->text();
+    /*
     ptThread_1->start_path_of_file = begin_search_1;
     ptThread_1->end_path_of_file = end_search_1;
     ptThread_1->string_word = ui->searchBar->text();
     ptThread_1->head_dir = global_path2;
-    ptThread_0->abort();
+    */
+    //ptThread_0->abort();
     //ptThread_1->abort();
-    main_thread->wait();
-    ptThread_0->abort();
+    //main_thread->wait();
+    //ptThread_0->abort();
     ptThread_0->requestWork();
-    //ptThread_1->requestWork();
-    main_thread->wait();
+    ptThread_1->requestWork();
+    ptThread_2->requestWork();
+    //main_thread->wait();
     //main_thread->wait();
     //stack<QString> new_stack = global_stack;
     //displayFilePaths(new_stack, ui);
     //dir = dirmodel->rootPath();
-    dirmodel = new QFileSystemModel( this );
-    dirmodel->setRootPath( "/Financial" );
-    ui->treeView->setModel( dirmodel );
-    ui->treeView->setRootIndex( dirmodel->index( "~/" ) );
-    root = dirmodel->rootPath();
-    displayFilePaths(global_stack, ui);
+    //root = dirmodel->rootPath();
+    //displayFilePaths(global_stack, ui);
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     qDebug() << "Time Spent:"<< time_spent;
