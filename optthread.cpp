@@ -45,6 +45,7 @@ void optThread::start(QString search_path, QString search_word)
                 for(;start <temp_entries.size(); start++){
                     QFileInfo tempInfo = temp_entries.at(start);
                     QString tempFilePath = tempInfo.filePath();
+                    qDebug() << "I am running" << tempFilePath << thread()->currentThreadId();
                     QDir check_dir = QDir( tempFilePath );
                     if(tempInfo.isDir()){
                         track_of_files.push(old_path);
@@ -84,6 +85,6 @@ void optThread::start(QString search_path, QString search_word)
     //}
 
     emit on_find(stack_of_files);
-    QThread::currentThread()->msleep(100);
+    //QThread::currentThread()->msleep(100);
 }
 
