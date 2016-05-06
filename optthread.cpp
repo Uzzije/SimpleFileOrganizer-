@@ -59,9 +59,11 @@ void optThread::doWork()
        //}
        QFileInfoList temp_entries = entries;
             while(count != 0){
+
                 mutex.lock();
                 bool aborting = _abort;
                 mutex.unlock();
+
                 if(aborting){
                     break;
                 }
@@ -69,7 +71,7 @@ void optThread::doWork()
                     QFileInfo tempInfo = temp_entries.at(start); //get file info
                     QString tempFilePath = tempInfo.filePath();  // get path string value
                     QDir check_dir = QDir( tempFilePath );       // make dir object
-                    qDebug() << "I am working right now on" << tempFilePath << thread()->currentThreadId();
+                    //qDebug() << "I am working right now on" << tempFilePath << thread()->currentThreadId();
                     if(tempInfo.isDir()){
                         track_of_files.push(tempFilePath);
                         old_path = tempFilePath;
@@ -83,11 +85,11 @@ void optThread::doWork()
                         QString file_name = q_file.fileName();
                         if( file_name.contains( string_word, Qt::CaseInsensitive ) )
                         {
-                            mutex.lock();
+
                             stack_of_files.push( check_dir.filePath( file_name ) );
                             //emit ReturnStackOfFiles(stack_of_files);
                             //return stack_of_files;
-                            mutex.unlock();
+
                         }
                     }
               }
