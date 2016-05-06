@@ -212,9 +212,13 @@ void MainWindow::on_searchButton_clicked()
 
     QFuture<void> test;
     QString search_word = ui->searchBar->text();
+    QString searchPath = "/Users/Administrator/Desktop";
+    QThreadPool::globalInstance()->setMaxThreadCount(1);
 
-    test = QtConcurrent::run(&this->ptjob, &optThread::start, root, search_word);
-    test.waitForFinished();
+        test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word);
+        test.waitForFinished();
+
+
 
     ui->searchBar->setText("Running.." + seconds);
     stack<QString> new_stack = global_stack ;
@@ -222,4 +226,5 @@ void MainWindow::on_searchButton_clicked()
 
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    qDebug() << "Time is:" << time_spent;
 }
