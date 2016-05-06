@@ -28,7 +28,7 @@ signals:
     void showResults();
 public slots:
     void update_global_path( std::stack<QString> stack_of_files );
-
+    void update_global_stack(QString path);
 private slots:
     void on_actionNew_Window_2_triggered();
     void on_searchButton_clicked();
@@ -47,9 +47,15 @@ private:
     int number_of_threads;
     optThread *ptThread_0;
     optThread *ptThread_1;
-    QThread *main_thread;
-    QThread *main2_thread;
     optThread *ptThread_2;
+    optThread *ptThread_3;
+    optThread *ptThread_4;
+
+    QThread *main_thread;
+    QThread *main4_thread;
+    QThread *main5_thread;
+    QThread *main2_thread;
+    QThread *main3_thread;
 };
 
 #endif // MAINWINDOW_H

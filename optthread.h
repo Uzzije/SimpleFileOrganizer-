@@ -20,12 +20,15 @@ private:
     bool _finished;
     QMutex mutex;
     bool _abort;
+
 signals:
     void ReturnStackOfFiles(std::stack<QString>);
+    void ReturnFoundWord(QString path);
     void workRequested();
     void finished();
 public slots:
     void doWork();
 };
 Q_DECLARE_METATYPE(std::stack<QString>)
+Q_DECLARE_METATYPE(QString)
 #endif // OPTTHREAD_H

@@ -7,6 +7,7 @@
 #include <QFileInfoList>
 #include <QFile>
 #include <QMutex>
+#include <QThread>
 
 
 optThread::optThread(QObject *parent)
@@ -24,23 +25,18 @@ void optThread::doWork()
     std::stack<std::stack<QString>> stack_of_stacks;
     std::stack<QString> stack_of_files, temp_stack; //a stack that holds all file paths containing directory or file of search word
     QDir start_path = QDir( head_dir ); //Initialize directory object to investigated directories content
-    //QEventLoop loop;
-    //QTimer::singleShot(1000, &loop, SLOT(quit()));
-    //loop.exec();
     if( !start_path.exists() ) // if the initialized directory is not a directory, check if it is a file
-    {
+    {  // mutex.lock();
         QFile q_file( start_path_of_file ); //initiliaze file object to investigate file
         if( q_file.exists() )
         {
             QString file_name = q_file.fileName(); //get file name
             if( file_name.contains( string_word, Qt::CaseInsensitive ) ) // check if file name contains string_word
             {
-                //return stack_of_files; // change this to emit
-                mutex.lock();
                 _finished = true;
-                mutex.unlock();
+
                 stack_of_files.push( start_path.filePath( file_name ) ); // push it's path into stack
-                emit ReturnStackOfFiles(stack_of_files);
+                emit ReturnFoundWord(start_path.filePath(file_name));
             }
         }
     }
@@ -52,22 +48,20 @@ void optThread::doWork()
        QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot ); // filter out its subdirectory for only files and folders
        QFileInfo startIndex(start_path_of_file);
        track_of_files.push( head_dir );
-       int start = 0; entries.indexOf(startIndex);
+       int start = entries.indexOf(startIndex);
        int count = -1;
-       //if(start < 0){
-          //count = 0;
-       //}
+       if(start < 0){
+          count = 0;
+       }
        QFileInfoList temp_entries = entries;
+       // mutex.unlock();
             while(count != 0){
-
-                mutex.lock();
                 bool aborting = _abort;
-                mutex.unlock();
-
                 if(aborting){
                     break;
                 }
                 for(;start <temp_entries.size(); start++){
+                    //qDebug() << "I was called" << thread()->currentThreadId();
                     QFileInfo tempInfo = temp_entries.at(start); //get file info
                     QString tempFilePath = tempInfo.filePath();  // get path string value
                     QDir check_dir = QDir( tempFilePath );       // make dir object
@@ -87,42 +81,49 @@ void optThread::doWork()
                         {
 
                             stack_of_files.push( check_dir.filePath( file_name ) );
-                            //emit ReturnStackOfFiles(stack_of_files);
+                            emit ReturnFoundWord(check_dir.filePath(file_name));
                             //return stack_of_files;
 
                         }
                     }
               }
-                /*
+
                 if(old_path == end_path_of_file){
+                    //mutex.lock();
                     count = 0;
-                    break;
+                    qDebug() << "I Should Stop now" << thread()->currentThreadId();  
+                    //break;
+                   //mutex.unlock();
                 }
-                */
-              int go_back_count = static_cast<int>( track_of_files.size() );
-              count = static_cast<int>( track_of_files.size() );
+                else{
+                    count = static_cast<int>( track_of_files.size() );
+                    //qDebug() << "I am still going" << thread()->currentThreadId();
+                  }
+                int go_back_count = count;
+                //qDebug() << count << "Count left" << old_path << thread()->currentThreadId();
                 if(go_back_count != 0){
                     track_of_files.pop();
                     if(go_back_count > 1){
                         QString tempFilePath_back = track_of_files.top();
                         QDir check_dir_back = QDir( tempFilePath_back );
                         temp_entries = check_dir_back.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot );
-                        //track_of_files.pop();
                         start = track_of_index_searched.top();
                         track_of_index_searched.pop();
+
                     }
                 }
+                mutex.lock();
                 if(count == 0){
-                   mutex.lock();
-                   _finished = true;
-                   mutex.unlock();
+                  _finished = true;
+                  qDebug() << "Set me to finished"<< thread()->currentThreadId();
                 }
+                 mutex.unlock();
             }
    }
-    int file_count = (int)stack_of_files.size();
-      emit ReturnStackOfFiles(stack_of_files);
+
     if(_finished){
-       emit finished();
+        emit finished();
+        qDebug() << "I am done" << thread()->currentThreadId();
     }
 }
 void optThread::abort(){
