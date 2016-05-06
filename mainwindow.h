@@ -12,6 +12,7 @@
 #include <QString>
 #include "mydialogue.h"
 #include "optthread.h"
+#include <QThread>
 namespace Ui {
 class MainWindow;
 }
@@ -23,25 +24,16 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    optThread *ptThread_1;
-    optThread *ptThread_0;
-    optThread *ptThread_2;
-    optThread *ptThread_3;
-    optThread *ptThread_4;
+signals:
+    void showResults();
 public slots:
     void update_global_path( std::stack<QString> stack_of_files );
+
 private slots:
     void on_actionNew_Window_2_triggered();
-
-
     void on_searchButton_clicked();
-    //void get_search_word(QFileSystemModel *search_path);
     void displayFilePaths(std::stack<QString> stackOfFiles, Ui::MainWindow * ui);
-
-    //void on_openFileButton_clicked();
-
     void on_fileView_clicked(const QModelIndex &index);
-    //stack<QString> get_search_word( QString search_path, QString search_word );
 
 private:
     Ui::MainWindow *ui;
@@ -51,8 +43,12 @@ private:
     std::stack<QString> global_stack;
     QString global_path;
     QString global_search_word;
-    QList<QList<QString>> global_thread_list;
+    QList<QStringList> global_thread_list;
     int number_of_threads;
+    optThread *ptThread_0;
+    optThread *ptThread_1;
+    QThread *main_thread;
+    QThread *main2_thread;
 };
 
 #endif // MAINWINDOW_H

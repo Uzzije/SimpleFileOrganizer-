@@ -30,25 +30,43 @@
 #include <time.h>
 #include <omp.h>
 #include "optthread.h"
-
+#include <QObject>
+#include <QDebug>
+#include <QThread>
 
 using namespace std;
- QList<QList<QString>> global_thread_list;
- int number_of_threads;
- std::stack<QString> global_stack;
+
+QList<QStringList> global_thread_list;
+int number_of_threads = 5;
+stack<QString> global_stack;
+stack<stack<QString>> stacking_it;
 MainWindow::MainWindow( QWidget *parent ) :
     QMainWindow( parent ),
     ui( new Ui::MainWindow )
 {
     ui->setupUi( this );
-    number_of_threads = 5;
-
+    ptThread_0 = new optThread();
+    ptThread_1 = new optThread();
+    main_thread = new QThread();
+    //main2_thread = new QThread();
+    ptThread_0->moveToThread(main_thread);
+    ptThread_1->moveToThread(main_thread);
+    qRegisterMetaType<std::stack<QString>>();
+    connect(ptThread_0, SIGNAL(workRequested()), main_thread, SLOT(start()));
+    connect(ptThread_0, SIGNAL(ReturnStackOfFiles(std::stack<QString>)), this, SLOT(update_global_path(std::stack<QString>)));
+    connect(main_thread, SIGNAL(started()), ptThread_0, SLOT(doWork()));
+    connect(ptThread_0, SIGNAL(finished()), main_thread, SLOT(quit()), Qt::DirectConnection);
+    connect(ptThread_1, SIGNAL(workRequested()), main_thread, SLOT(start()));
+    connect(ptThread_1, SIGNAL(ReturnStackOfFiles(std::stack<QString>)), this, SLOT(update_global_path(std::stack<QString>)));
+    connect(main_thread, SIGNAL(started()), ptThread_1, SLOT(doWork()));
+    connect(ptThread_1, SIGNAL(finished()), main_thread, SLOT(quit()), Qt::DirectConnection);
 }
 
-QList<QString> path_start_end(int index){
-    QList<QString> temp_list;
-    if(index > global_thread_list.size()){
-        global_thread_list[index][0].append("empty");
+QStringList path_start_end(int index){
+    QStringList temp_list;
+    if((index - 1) > global_thread_list.size()){
+        temp_list.append("empty");
+        temp_list.append("empty");
     }
     temp_list.append(global_thread_list[index][0]); // append first element;
     temp_list.append(global_thread_list[index][global_thread_list[index].size() - 1]); // append last element
@@ -58,16 +76,26 @@ QList<QString> path_start_end(int index){
 
 MainWindow::~MainWindow()
 {
+    ptThread_0->abort();
+    ptThread_1->abort();
+    main_thread->wait();
+    delete main_thread;
+    delete ptThread_0;
     delete ui;
 }
 void MainWindow::update_global_path(stack<QString> stack_of_files){
-    QString file_path_name;
-    for(int start = 0; start < (int)stack_of_files.size(); start++){
-        file_path_name = stack_of_files.top();
-        global_stack.push(file_path_name);
-        stack_of_files.pop();
+   // global_stack = stack_of_files;
+    //QString testing = stack_of_files.top();
+    //global_stack.push(testing);
+    /*
+    stack<QString> temp_stack (stack_of_files);
+    for(int x = 0; x < temp_stack.size(); x++){
+        QString path = temp_stack.top();
+        global_stack.push(path);
+        temp_stack.pop();
     }
-
+    */
+    displayFilePaths(stack_of_files, ui);
 }
 
 void MainWindow::on_actionNew_Window_2_triggered() //click a new window in menu
@@ -79,33 +107,41 @@ void MainWindow::on_actionNew_Window_2_triggered() //click a new window in menu
 void set_up_thread( QString search_path )
 {
 
-    QList<QList<QString>> all_file_path;
     QDir start_path = QDir( search_path ); // get initial start path
+    QString temp_path;
     QFileInfoList entries = start_path.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot ); //get the list of directories in initial start path
     int num = number_of_threads;
+    QList<QStringList> all_file_path;
     int index = entries.size()/num; //get the count of how many directory will be worked on per thread (there might be remainders)
     if (entries.size() < number_of_threads){ // if folder entries is less than the number of threads available to use
+        QStringList temp_list_single;
         for(int big_entry = 0; big_entry < entries.size(); big_entry++){ // for each entry in start path
-            QString temp_path = entries.at(big_entry).filePath(); // create a file path of that entry
+            all_file_path.append(temp_list_single);
+            QFileInfo fileInfo = entries.at( big_entry ); //get the directory/file of each of its subdirectory by index
+            temp_path = fileInfo.filePath(); // get that subdirectory file/folder path
             all_file_path[big_entry].append(temp_path); //assign each index of all_file_path a list object with exactly one element (file_path). Basically assigning one thread per folder
           }
      }
     else{ // If not the case that directories are more than folders from start path
         for(int entry = 0; entry < number_of_threads; entry++){ // go through each index of all_path_files that we intend to create a list of file path in
-            for(int mul_path = 0; mul_path < index; mul_path++){ // go through the first sets of file_path to allocate to the first index of all_file_path and so forth
-                QString temp_path = entries.at(mul_path).filePath(); // grab the string version of file paths
-                all_file_path[entry].append(temp_path); // add those file paths to the index of all_file_path
+            QStringList temp_list;
+            for(int mul_path = entry; mul_path < (index + entry); mul_path++){ // go through the first sets of file_path to allocate to the first index of all_file_path and so forth
+                temp_list.append(entries.at(mul_path).filePath()); // add those file paths to the index of all_file_path
             }
+            all_file_path.append(temp_list);
+
          }
+
             if((index*number_of_threads) < entries.size()){ // check if there are left over files that we didn't grab i.e remainder of the index initialization above
-                for(int start = (index*number_of_threads + 1); start < entries.size(); start++){ // add the remainder file path to a new all_file_path index
-                QString temp_path = entries.at(start).filePath(); // create directory path into a string
-                all_file_path[index + 1].append( temp_path ); // pass the remainder into a single index in the all_file_path index
-            }
-         }
+                QStringList temp_list_mod;
+                for(int start = (index*number_of_threads); start < entries.size(); start++){ // add the remainder file path to a new all_file_path index
+                    temp_list_mod.append(entries.at(start).filePath());
+                   }
+                all_file_path.append( temp_list_mod ); // pass the remainder into a single index in the all_file_path index
+             }
       }
 
-    global_thread_list.append(all_file_path);
+    global_thread_list = all_file_path;
  }
 
 void MainWindow::on_fileView_clicked(const QModelIndex &index)
@@ -116,6 +152,7 @@ void MainWindow::on_fileView_clicked(const QModelIndex &index)
                 this, tr("Open File"),click_path,"All files (*.*);;Text File (*.txt);;Music file(*.mp3)"
                 );
 }
+
 void MainWindow::displayFilePaths(stack<QString> stackOfFiles, Ui::MainWindow * ui)
 {
     QString file_path;
@@ -170,25 +207,39 @@ void MainWindow::on_searchButton_clicked()
     QString string, root;
     QMessageBox msgBox;
     double time_spent;
-    
+    global_path = QDir::rootPath();//QDir::rootPath();
+    QString global_path2 = "/Financial";
+    set_up_thread( global_path );
+    QString begin_search = path_start_end(0)[0];
+    QString end_search = path_start_end(0)[1];
+    QString begin_search_1 = path_start_end(1)[0];
+    QString end_search_1 = path_start_end(1)[1];
+    ptThread_0->start_path_of_file = begin_search;
+    ptThread_0->end_path_of_file = end_search;
+    ptThread_0->head_dir = global_path;
+    ptThread_0->string_word = ui->searchBar->text();
+    ptThread_1->start_path_of_file = begin_search_1;
+    ptThread_1->end_path_of_file = end_search_1;
+    ptThread_1->string_word = ui->searchBar->text();
+    ptThread_1->head_dir = global_path2;
+    ptThread_0->abort();
+    //ptThread_1->abort();
+    main_thread->wait();
+    ptThread_0->abort();
+    ptThread_0->requestWork();
+    //ptThread_1->requestWork();
+    main_thread->wait();
+    //main_thread->wait();
+    //stack<QString> new_stack = global_stack;
+    //displayFilePaths(new_stack, ui);
+    //dir = dirmodel->rootPath();
     dirmodel = new QFileSystemModel( this );
     dirmodel->setRootPath( "/Financial" );
     ui->treeView->setModel( dirmodel );
     ui->treeView->setRootIndex( dirmodel->index( "~/" ) );
     root = dirmodel->rootPath();
-    global_path = QDir::rootPath();
-    set_up_thread( global_path );
-    global_search_word = ui->searchBar->text();
-    QString end_path = "/Applications";
-    ptThread_0 = new optThread(this);
-    ptThread_0->start_path_of_file = path_start_end(1)[0];
-    ptThread_0->end_path_of_file = path_start_end(1)[1];
-    ptThread_0->string_word = ui->searchBar->text();
-    ptThread_0->start();
-    stack<QString> new_stack( global_stack );
-    connect(ptThread_0, SIGNAL(ReturnStackOfFile(stack<QString>)), this, SLOT(update_global_path(stack<QString>)));
-    displayFilePaths(new_stack, ui);
-    dir = dirmodel->rootPath();
+    displayFilePaths(global_stack, ui);
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    qDebug() << "Time Spent:"<< time_spent;
 }
