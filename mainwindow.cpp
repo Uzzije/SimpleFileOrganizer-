@@ -263,7 +263,10 @@ void MainWindow::on_searchButton_clicked()
     QString searchPath = "/Users/Administrator/Desktop/";
     QString start_path;
     QString end_path;
+    QString end_file = "";
+     /*
     QList<QStringList> listofpath = set_up_thread(searchPath, number_of_thread);
+
     for(int x = 0; x < number_of_thread; x++){
         QStringList tempList = listofpath[x];
         start_path = tempList[0];
@@ -272,7 +275,9 @@ void MainWindow::on_searchButton_clicked()
 
     }
     test.waitForFinished();
-
+    */
+    test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, searchPath, end_file);
+    test.waitForFinished();
     //ui->searchBar->setText("Running.." + seconds);
     //stack<QString> new_stack = global_stack ;
     //displayFilePaths(test.result(), ui);
