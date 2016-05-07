@@ -48,9 +48,9 @@ void optThread::start(QString search_path, QString search_word)
            track_of_files.push( search_path );
            int start = 0; //entries.indexOf(startIndex);
            int count = -1;
-           //if(start < 0){
-              //count = 0;
-           //}
+           if(start < 0){
+              count = 0;
+           }
            QFileInfoList temp_entries = entries;
                 while(count != 0){
                     for(;start <temp_entries.size(); start++){
@@ -79,12 +79,12 @@ void optThread::start(QString search_path, QString search_word)
                             }
                         }
                   }
-                    /*
+
                     if(old_path == end_path_of_file){
                         count = 0;
                         break;
                     }
-                    */
+
                   int go_back_count = static_cast<int>( track_of_files.size() );
                   count = static_cast<int>( track_of_files.size() );
                     if(go_back_count != 0){
