@@ -16,6 +16,7 @@ public:
     QString head_dir;
     void abort();
     void requestWork();
+    void requestPartWork();
 private:
     bool _finished;
     QMutex mutex;

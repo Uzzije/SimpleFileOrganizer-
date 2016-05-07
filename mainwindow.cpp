@@ -38,7 +38,7 @@ using namespace std;
 
 QList<QStringList> global_thread_list;
 
-int number_of_threads = 5;
+int number_of_threads = 1;
 //stack<QString> global_stack;
 stack<stack<QString>> stacking_it;
 MainWindow::MainWindow( QWidget *parent ) :
@@ -46,26 +46,11 @@ MainWindow::MainWindow( QWidget *parent ) :
     ui( new Ui::MainWindow )
 {
     ui->setupUi( this );
-    // Hard coded 5 Threads, we could possible make a foor loop instead for more customization
 
     ptThread_0 = new optThread();
-    ptThread_1 = new optThread();
-    ptThread_2 = new optThread();
-    ptThread_3 = new optThread();
-    ptThread_4 = new optThread();
 
     main_thread = new QThread();
-    main2_thread = new QThread();
-    main3_thread = new QThread();
-    main4_thread = new QThread();
-    main5_thread = new QThread();
-
     ptThread_0->moveToThread(main_thread);
-    ptThread_1->moveToThread(main2_thread);
-    ptThread_2->moveToThread(main3_thread);
-    ptThread_3->moveToThread(main_thread);
-    ptThread_4->moveToThread(main2_thread);
-
     qRegisterMetaType<std::stack<QString>>();
     qRegisterMetaType<QString>();
 
@@ -73,28 +58,6 @@ MainWindow::MainWindow( QWidget *parent ) :
     connect(ptThread_0, SIGNAL(ReturnFoundWord(QString)), this, SLOT(update_global_stack(QString)));
     connect(main_thread, SIGNAL(started()), ptThread_0, SLOT(doWork()));
     connect(ptThread_0, SIGNAL(finished()), main_thread, SLOT(quit()), Qt::DirectConnection);
-
-    connect(ptThread_1, SIGNAL(workRequested()), main2_thread, SLOT(start()));
-    connect(ptThread_1, SIGNAL(ReturnFoundWord(QString)), this, SLOT(update_global_stack(QString)));
-    connect(main2_thread, SIGNAL(started()), ptThread_1, SLOT(doWork()));
-    connect(ptThread_1, SIGNAL(finished()), main2_thread, SLOT(quit()), Qt::DirectConnection);
-
-    connect(ptThread_2, SIGNAL(workRequested()), main_thread, SLOT(start()));
-    connect(ptThread_2, SIGNAL(ReturnFoundWord(QString)), this, SLOT(update_global_stack(QString)));
-    connect(main3_thread, SIGNAL(started()), ptThread_2, SLOT(doWork()));
-    connect(ptThread_2, SIGNAL(finished()), main3_thread, SLOT(quit()), Qt::DirectConnection);
-
-    /*
-    connect(ptThread_3, SIGNAL(workRequested()), main4_thread, SLOT(start()));
-    connect(ptThread_3, SIGNAL(ReturnFoundWord(QString)), this, SLOT(update_global_stack(QString)));
-    connect(main4_thread, SIGNAL(started()), ptThread_3, SLOT(doWork()));
-    connect(ptThread_3, SIGNAL(finished()), main4_thread, SLOT(quit()), Qt::DirectConnection);
-
-    connect(ptThread_4, SIGNAL(workRequested()), main5_thread, SLOT(start()));
-    connect(ptThread_4, SIGNAL(ReturnFoundWord(QString)), this, SLOT(update_global_stack(QString)));
-    connect(main5_thread, SIGNAL(started()), ptThread_4, SLOT(doWork()));
-    connect(ptThread_4, SIGNAL(finished()), main5_thread, SLOT(quit()), Qt::DirectConnection);
-    */
 
     dirmodel = new QFileSystemModel( this );
     dirmodel->setRootPath( "/Financial" );
@@ -118,9 +81,17 @@ MainWindow::~MainWindow()
 {
     ptThread_0->abort();
     ptThread_1->abort();
+    ptThread_2->abort();
+    ptThread_3->abort();
+    ptThread_4->abort();
     main_thread->wait();
+    main2_thread->wait();
+    main3_thread->wait();
+    main4_thread->wait();
+    main5_thread->wait();
     delete main_thread;
     delete ptThread_0;
+    delete ptThread_1;
     delete ui;
 }
 void MainWindow::update_global_path(stack<QString> stack_of_files){
@@ -138,17 +109,6 @@ void MainWindow::update_global_path(stack<QString> stack_of_files){
     displayFilePaths(stack_of_files, ui);
 }
 void MainWindow::update_global_stack(QString path){
-   // global_stack = stack_of_files;
-    //QString testing = stack_of_files.top();
-    //global_stack.push(testing);
-    /*
-    stack<QString> temp_stack (stack_of_files);
-    for(int x = 0; x < temp_stack.size(); x++){
-        QString path = temp_stack.top();
-
-        temp_stack.pop();
-    }
-    */
     this->global_stack.push(path);
     qDebug() << "Added:" << path << "To Stack";
     displayFilePaths(global_stack, ui);
@@ -265,39 +225,17 @@ void MainWindow::on_searchButton_clicked()
     QMessageBox msgBox;
     double time_spent;
     global_path = QDir::rootPath();//QDir::rootPath();
-    QString global_path2 = "/Users/Administrator/Desktop/CIS 625";
+    QString global_path2 = "/Users/Administrator/Desktop";
     set_up_thread( global_path2 );
-
     QString begin_search = path_start_end(0)[0];
-    QString end_search = path_start_end(2)[1];
-
+    QString end_search = path_start_end(0)[1];
     ptThread_0->start_path_of_file = begin_search;
     ptThread_0->end_path_of_file = end_search;
     ptThread_0->head_dir = global_path2;
     ptThread_0->string_word = ui->searchBar->text();
-
-    QString begin_search_1 = path_start_end(3)[0];
-    QString end_search_1 = path_start_end(3)[1];
-
-    ptThread_1->start_path_of_file = begin_search_1;
-    ptThread_1->end_path_of_file = end_search_1;
-    ptThread_1->string_word = ui->searchBar->text();
-    ptThread_1->head_dir = global_path2;
-
-    QString begin_search_2 = path_start_end(4)[0];
-    QString end_search_2 = path_start_end(4)[1];
-
-    ptThread_2->start_path_of_file = begin_search_2;
-    ptThread_2->end_path_of_file = end_search_2;
-    ptThread_2->string_word = ui->searchBar->text();
-    ptThread_2->head_dir = global_path2;
-
     ptThread_0->requestWork();
-    ptThread_1->requestWork();
-    //ptThread_2->requestWork();
     main_thread->wait();
-    main2_thread->wait();
-    main3_thread->wait();
+
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
     qDebug() << "Time Spent:"<< time_spent;

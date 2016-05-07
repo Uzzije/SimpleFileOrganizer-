@@ -86,6 +86,7 @@ void optThread::doWork()
 
                         }
                     }
+
               }
 
                 if(old_path == end_path_of_file){
@@ -100,7 +101,7 @@ void optThread::doWork()
                     //qDebug() << "I am still going" << thread()->currentThreadId();
                   }
                 int go_back_count = count;
-                //qDebug() << count << "Count left" << old_path << thread()->currentThreadId();
+                qDebug() << count << "Count left" << old_path << thread()->currentThreadId();
                 if(go_back_count != 0){
                     track_of_files.pop();
                     if(go_back_count > 1){
@@ -118,6 +119,7 @@ void optThread::doWork()
                   qDebug() << "Set me to finished"<< thread()->currentThreadId();
                 }
                  mutex.unlock();
+                 //QThread::msleep(100);
             }
    }
 
@@ -136,6 +138,14 @@ void optThread::requestWork(){
     _finished = false;
     _abort = false;
     qDebug()<< "Request worker start in Thread "<< thread()->currentThreadId();
+    mutex.unlock();
+    emit workRequested();
+}
+void optThread::requestPartWork(){
+    mutex.lock();
+    _finished = false;
+    _abort = false;
+    qDebug()<< "Request worker start in Thread Part "<< thread()->currentThreadId();
     mutex.unlock();
     emit workRequested();
 }
