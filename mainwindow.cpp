@@ -37,6 +37,7 @@ using namespace std;
 
 QString seconds = "not in stack";
 stack<QString> global_stack;
+int number_of_thread = 1;
 MainWindow::MainWindow( QWidget *parent ) :
     QMainWindow( parent ),
     ui( new Ui::MainWindow )
@@ -65,14 +66,16 @@ void MainWindow::add_to_stack(QString name){
     global_stack.push(name);
     seconds = "In add stack";
     //qDebug() << "i am called to add to stack" << global_stack.top();
+    displayFilePaths(global_stack, ui);
 }
 
 QList<QStringList> set_up_thread( QString search_path, int number_of_threads )
 {
 
+
     QDir start_path = QDir( search_path ); // get initial start path
     QString temp_path;
-    QFileInfoList entries = start_path.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot ); //get the list of directories in initial start path
+    QFileInfoList entries = start_path.entryInfoList(QDir::Dirs|QDir::Files|QDir::NoDotAndDotDot ); //get the list of directories in initial start path
     QList<QStringList> all_file_path;
     int index = entries.size()/number_of_threads; //get the count of how many directory will be worked on per thread (there might be remainders)
     if (entries.size() < number_of_threads){ // if folder entries is less than the number of threads available to use
@@ -83,6 +86,10 @@ QList<QStringList> set_up_thread( QString search_path, int number_of_threads )
             temp_path = fileInfo.filePath(); // get that subdirectory file/folder path
             all_file_path[big_entry].append(temp_path); //assign each index of all_file_path a list object with exactly one element (file_path). Basically assigning one thread per folder
           }
+        for(int rest = entries.size(); rest < number_of_threads; rest++){
+            all_file_path.append(temp_list_single);
+            all_file_path[rest].append("empty");
+        }
      }
     else{
         int mul_path = 0;// If not the case that directories are more than folders from start path
@@ -251,39 +258,24 @@ void MainWindow::on_searchButton_clicked()
     //QDir start_path = QDir( root );
     //QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot );
 
-    QFuture<void> test;
-    QFuture<void> searchTwo;
-    QFuture<void> searchThree;
-    QFuture<void> searchFour;
-    QFuture<void> searchFive;
+    QFuture<stack<QString>> test;
     QString search_word = ui->searchBar->text();
-    QString searchPath = "/Users/Administrator/Desktop";
-    QThreadPool::globalInstance()->setMaxThreadCount(5);
-    QList<QStringList> listofIndex = set_up_thread(searchPath, 10);
-    int size_of_thread_dis = listofIndex.size();
+    QString searchPath = "/Users/Administrator/Desktop/";
     QString start_path;
     QString end_path;
-    int last_index = listofIndex[0].size() - 1;
-    start_path = listofIndex[0][0];
-    end_path = listofIndex[6][last_index];
-    QString start_path1 = listofIndex[7][0];
-    QString end_path1 = listofIndex[9][last_index];
-    test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path, end_path);
-    searchTwo = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path1, end_path1);
-    //searchThree = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path, end_path);
-    //searchFour = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path, end_path);
-    //searchFive = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path, end_path);
-    test.waitForFinished();
-    //qDebug() << "Time one:" << (double)(end - begin) / CLOCKS_PER_SEC;
-    searchTwo.waitForFinished();
-    //qDebug() << "Time two:" << (double)(end - begin) / CLOCKS_PER_SEC;
-    //searchThree.waitForFinished();
-    //searchFour.waitForFinished();
-    //searchFive.waitForFinished();
+    QList<QStringList> listofpath = set_up_thread(searchPath, number_of_thread);
+    for(int x = 0; x < number_of_thread; x++){
+        QStringList tempList = listofpath[x];
+        start_path = tempList[0];
+        end_path = tempList[tempList.size() - 1];
+        test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path, end_path);
 
-    ui->searchBar->setText("Running.." + seconds);
-    stack<QString> new_stack = global_stack ;
-    displayFilePaths(global_stack, ui);
+    }
+    test.waitForFinished();
+
+    //ui->searchBar->setText("Running.." + seconds);
+    //stack<QString> new_stack = global_stack ;
+    //displayFilePaths(test.result(), ui);
 
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
