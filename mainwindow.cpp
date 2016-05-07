@@ -213,11 +213,12 @@ void MainWindow::on_searchButton_clicked()
     QFuture<void> test;
     QString search_word = ui->searchBar->text();
     QString searchPath = "/Users/Administrator/Desktop";
-    QThreadPool::globalInstance()->setMaxThreadCount(1);
-
-        test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word);
+    QThreadPool::globalInstance()->setMaxThreadCount(30);
+        for(int i=0; i< 30; i++){
+            test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word);
+            qDebug() << "I am thread:"<< thread()->currentThreadId();
+        }
         test.waitForFinished();
-
 
 
     ui->searchBar->setText("Running.." + seconds);

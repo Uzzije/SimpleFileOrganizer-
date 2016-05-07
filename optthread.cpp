@@ -57,7 +57,7 @@ void optThread::start(QString search_path, QString search_word)
                         QFileInfo tempInfo = temp_entries.at(start); //get file info
                         QString tempFilePath = tempInfo.filePath();  // get path string value
                         QDir check_dir = QDir( tempFilePath );       // make dir object
-                        //qDebug() << "I am working right now on" << tempFilePath << thread()->currentThreadId();
+                        qDebug() << "I am working right now on" << tempFilePath << thread()->currentThreadId();
                         if(tempInfo.isDir()){
                             track_of_files.push(tempFilePath);
 
@@ -79,12 +79,12 @@ void optThread::start(QString search_path, QString search_word)
                             }
                         }
                   }
-
+                    /*
                     if(old_path == end_path_of_file){
                         count = 0;
                         break;
                     }
-
+                    */
                   int go_back_count = static_cast<int>( track_of_files.size() );
                   count = static_cast<int>( track_of_files.size() );
                     if(go_back_count != 0){
