@@ -35,7 +35,7 @@ private slots:
     void on_fileView_clicked(const QModelIndex &index);
 
 public slots:
-    void add_to_stack(std::stack<QString> name);
+    void add_to_stack(QString name);
 
 private:
     Ui::MainWindow *ui;
@@ -44,6 +44,7 @@ private:
     QFileSystemModel *dirmodel;
     optThread ptjob;
     std::stack<QString> global_stack;
+    QList<QStringList> global_thread_list;
 };
 
 #endif // MAINWINDOW_H
