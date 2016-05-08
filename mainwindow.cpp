@@ -192,7 +192,7 @@ void MainWindow::on_searchButton_clicked()
     QFuture<void> test;
     QFuture<stack<QString>> test_two;
     QString search_word = ui->searchBar->text();
-    QString searchPath = "/Users/Administrator/Desktop/CIS 625";
+    QString searchPath = "/Users/Administrator/Desktop/CIS 732";
     QString start_path;
     QString end_path;
     QString end_file = "";
