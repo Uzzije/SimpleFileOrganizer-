@@ -122,3 +122,25 @@ std::stack<QString> optThread::start(QString search_path, QString search_word, Q
     }
     return stack_of_files;
 }
+std::stack<QString> optThread::set_up_thread_files( QString search_path, QString search_word){
+    std::stack<QString> stack_of_files;
+    stack_of_files.push("");
+    QDir start_path = QDir( search_path ); // get initial start path
+    QString temp_path;
+    QFileInfoList entries_file = start_path.entryInfoList(QDir::Files);
+    for(int big_entry = 0; big_entry < entries_file.size(); big_entry++){
+        QFileInfo fileInfo = entries_file.at( big_entry );
+        QFile q_files( fileInfo.filePath() );//use fileInfo.filePath
+        if( q_files.exists() )
+        {
+            QString file_name = q_files.fileName();
+            if( file_name.contains( search_word, Qt::CaseInsensitive ) )
+            {
+                //stack_of_files.push( file_name );
+                emit on_find( file_name );
+                //
+            }
+        }
+  }
+    return stack_of_files;
+}

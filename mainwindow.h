@@ -29,7 +29,7 @@ private slots:
     void on_searchButton_clicked();
     //void get_search_word(QFileSystemModel *search_path);
     void displayFilePaths(std::stack<QString> stackOfFiles, Ui::MainWindow * ui);
-
+    //void set_up_thread_files(QString search_path, QString search_word);
     //void on_openFileButton_clicked();
 
     void on_fileView_clicked(const QModelIndex &index);
@@ -43,6 +43,8 @@ private:
     QStringListModel *list_view_model;
     QFileSystemModel *dirmodel;
     optThread ptjob;
+    optThread ptjobs;
+    MainWindow *main_stuff;
     std::stack<QString> global_stack;
     QList<QStringList> global_thread_list;
 };
