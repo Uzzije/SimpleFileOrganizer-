@@ -166,7 +166,7 @@ void MainWindow::add_to_stack(QString name){
 
     global_stack.push(name);
 
-            displayFilePaths(global_stack, ui);
+    displayFilePaths(global_stack, ui);
 }
 
 void MainWindow::on_searchButton_clicked()
@@ -189,13 +189,14 @@ void MainWindow::on_searchButton_clicked()
     //QDir start_path = QDir( root );
     //QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot );
 
-    QFuture<void> test;
-    QFuture<stack<QString>> test_two;
+    QFuture<stack<QString>> test;
+    QFuture<QList<QStringList>> test_two;
     QString search_word = ui->searchBar->text();
-    QString searchPath = "/Users/Administrator/Desktop/CIS 732";
+    QString searchPath = "/Users/Administrator/Desktop/";
     QString start_path;
     QString end_path;
     QString end_file = "";
+    //test_two = QtConcurrent::run(&this->ptjob3, &optThread::set_up_thread)
     QList<QStringList> listofpath = set_up_thread(searchPath, number_of_thread);
     test = QtConcurrent::run(&this->ptjobs, &optThread::set_up_thread_files, searchPath, search_word);
     for(int x = 0; x < number_of_thread; x++){
@@ -207,12 +208,8 @@ void MainWindow::on_searchButton_clicked()
     }
 
     test.waitForFinished();
-    //test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, searchPath, end_file);
-    test.waitForFinished();
-    //set_up_thread_files(searchPath, search_word);
-    //ui->searchBar->setText("Running.." + seconds);
-    //stack<QString> new_stack = global_stack ;
-    //displayFilePaths(test.result(), ui);
+    //test.waitForFinished();
+    displayFilePaths(test.result(), ui);
 
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

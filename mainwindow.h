@@ -44,6 +44,7 @@ private:
     QFileSystemModel *dirmodel;
     optThread ptjob;
     optThread ptjobs;
+    optThread ptjob3;
     MainWindow *main_stuff;
     std::stack<QString> global_stack;
     QList<QStringList> global_thread_list;

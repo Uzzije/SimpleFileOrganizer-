@@ -79,7 +79,7 @@ std::stack<QString> optThread::start(QString search_path, QString search_word, Q
 
             QFileInfo fileInfo = entries.at( entry ); //get the directory/file of each of its subdirectory by index
             temp_path = fileInfo.filePath(); // get that subdirectory file/folder path
-            //qDebug() << "Currently On:" << temp_path;
+            //qDebug() << "Currently On:" << temp_path << thread()->currentThreadId();
             QDir check_dir = QDir( temp_path ); // initialize a directory object for that subdirectory to investigate its content
             if( fileInfo.isDir() ) // if subdirectory is a directory
             {
