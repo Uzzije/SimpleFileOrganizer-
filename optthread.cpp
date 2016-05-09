@@ -41,6 +41,7 @@ optThread::optThread(QObject *parent) : QObject(parent)
 std::stack<QString> optThread::start(QString search_path, QString search_word, QString start_path_of_file, QString end_path_of_file)
 {
 
+    qDebug() << "Currently On:" << thread()->currentThreadId() << start_path_of_file;
     QString temp_path; //holds temporal paths variable for looping through
     std::stack<std::stack<QString>> stack_of_stacks;
     std::stack<QString> stack_of_files, temp_stack; //a stack that holds all file paths containing directory or file of search word
@@ -79,7 +80,7 @@ std::stack<QString> optThread::start(QString search_path, QString search_word, Q
 
             QFileInfo fileInfo = entries.at( entry ); //get the directory/file of each of its subdirectory by index
             temp_path = fileInfo.filePath(); // get that subdirectory file/folder path
-            //qDebug() << "Currently On:" << temp_path << thread()->currentThreadId();
+            //qDebug() << "Currently On:" << thread()->currentThreadId();
             QDir check_dir = QDir( temp_path ); // initialize a directory object for that subdirectory to investigate its content
             if( fileInfo.isDir() ) // if subdirectory is a directory
             {
@@ -96,7 +97,7 @@ std::stack<QString> optThread::start(QString search_path, QString search_word, Q
                 if( file_name.contains( search_word, Qt::CaseInsensitive ) )
                 {
                     stack_of_files.push( file_name );
-                    emit on_find(file_name);
+                    //emit on_find(file_name);
                     //return stack_of_files;
                 }
             }
@@ -123,6 +124,7 @@ std::stack<QString> optThread::start(QString search_path, QString search_word, Q
     return stack_of_files;
 }
 std::stack<QString> optThread::set_up_thread_files( QString search_path, QString search_word){
+    qDebug() << "Currently On:" << thread()->currentThreadId();
     std::stack<QString> stack_of_files;
     stack_of_files.push("");
     QDir start_path = QDir( search_path ); // get initial start path
@@ -137,7 +139,7 @@ std::stack<QString> optThread::set_up_thread_files( QString search_path, QString
             if( file_name.contains( search_word, Qt::CaseInsensitive ) )
             {
                 //stack_of_files.push( file_name );
-                emit on_find( file_name );
+                //emit on_find( file_name );
                 //
             }
         }
@@ -147,14 +149,20 @@ std::stack<QString> optThread::set_up_thread_files( QString search_path, QString
 
 QList<QStringList> optThread::set_up_thread( QString search_path, int number_of_threads )
 {
+    qDebug() << "Currently On:" << thread()->currentThreadId();
+
     QDir start_path = QDir( search_path ); // get initial start path
     QString temp_path;
     QFileInfoList entries = start_path.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot ); //get the list of directories in initial start path
+    QThread::usleep(5);
+     qDebug() << "im sleep"<< thread()->currentThreadId();
     QList<QStringList> all_file_path;
     int index = entries.size()/number_of_threads; //get the count of how many directory will be worked on per thread (there might be remainders)
     if (entries.size() < number_of_threads){ // if folder entries is less than the number of threads available to use
         QStringList temp_list_single;
         for(int big_entry = 0; big_entry < entries.size(); big_entry++){ // for each entry in start path
+            QThread::usleep(5);
+             qDebug() << "im sleep"<< thread()->currentThreadId();
             all_file_path.append(temp_list_single);
             QFileInfo fileInfo = entries.at( big_entry ); //get the directory/file of each of its subdirectory by index
             temp_path = fileInfo.filePath(); // get that subdirectory file/folder path

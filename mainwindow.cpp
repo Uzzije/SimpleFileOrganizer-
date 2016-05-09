@@ -40,7 +40,7 @@ using namespace std;
 QString seconds = "not in stack";
 stack<QString> global_stack;
 //stack<double> time_stack;
-int number_of_thread = 100;
+int number_of_thread = QThread::idealThreadCount();
 clock_t begin_of_clock;
 clock_t end_of_clock;
 clock_t time_spent;
@@ -147,7 +147,7 @@ void createFolder( stack<QString> files, QDir dir )
     QString src, dest, file_name, file_num;
     QStringList list;
     int index, i = 1;
- 
+
     dest = "~/"; //update to get path from UI
     
     while( !dir.mkdir( dest ) )
@@ -178,18 +178,18 @@ void MainWindow::add_to_stack(QString name){
     displayFilePaths(global_stack, ui);
     end_of_clock = clock();
 
-    time_spent = (double)(end_of_clock - begin_of_clock) / CLOCKS_PER_SEC;
+    //time_spent = (double)(end_of_clock - begin_of_clock) / CLOCKS_PER_SEC;
     //time_spents = time_spents + time_stack.top();
     //time_stack.pop();
     //time_stack.push(time_spents);
     //time_spent = (double) begin_of_clock/CLOCKS_PER_SEC + time_spent;
-    qDebug() << "time:" << time_spent;
+    //qDebug() << "time:" << time_spent;
 
 }
 
 void MainWindow::on_searchButton_clicked()
 {
-    begin_of_clock = clock();
+
     QDir dir;
     QString string, root;
     QMessageBox msgBox;
@@ -212,19 +212,21 @@ void MainWindow::on_searchButton_clicked()
     QFuture<stack<QString>> test_place;
     QFuture<QList<QStringList>> test_two;
     QString search_word = ui->searchBar->text();
-    QString searchPath = "/Users/Administrator/";
+    QString searchPath = "/Users/Administrator/Desktop/";
     QString start_path;
     QString end_path;
     QString end_file = "";
     QThreadPool::globalInstance()->setMaxThreadCount(30);
     for(int x = 0; x < number_of_thread; x++){
-       test_two = QtConcurrent::run(&this->ptjob3, &optThread::set_up_thread, searchPath, number_of_thread);
+      test_two = QtConcurrent::run(&this->ptjob3, &optThread::set_up_thread, searchPath, number_of_thread);
     }
-    //test_two.waitForFinished();
+    test_two.waitForFinished();
     //synchronizer.addFuture(test_two);
     QList<QStringList> listofpath = test_two.result();//set_up_thread(searchPath, number_of_thread);
     test_place = QtConcurrent::run(&this->ptjobs, &optThread::set_up_thread_files, searchPath, search_word);
     //synchronizer.setFuture(test_place);
+    clock_t begin = clock(), end;
+
     for(int x = 0; x < number_of_thread; x++){
         QStringList tempList = listofpath[x];
         start_path = tempList[0];
@@ -235,14 +237,14 @@ void MainWindow::on_searchButton_clicked()
     }
 
     //test_place.waitForFinished();
-    //test.waitForFinished();
+    test.waitForFinished();
     //synchronizer.waitForFinished();
 
     //displayFilePaths(test.result(), ui);
 
-    //end = clock();
-    //time_spent = (double)(end - begin) / CLOCKS_PER_SEC + time_spent;
+    end = clock();
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 
-   //qDebug() << "Time is:" << time_spent;
+   qDebug() << "Time is:" << QThread::idealThreadCount() << time_spent;
 
 }
