@@ -39,7 +39,7 @@ using namespace std;
 QString seconds = "not in stack";
 stack<QString> global_stack;
 //stack<double> time_stack;
-int number_of_thread = 100;
+int number_of_thread = 5;
 //clock_t begins = clock();
 //clock_t time_ends = clock();
 //double time_spents = 0.0;
@@ -206,7 +206,7 @@ void MainWindow::on_searchButton_clicked()
     QFuture<stack<QString>> test_place;
     QFuture<QList<QStringList>> test_two;
     QString search_word = ui->searchBar->text();
-    QString searchPath = "/Users/Administrator/Desktop";
+    QString searchPath = "/Users/Administrator/";
     QString start_path;
     QString end_path;
     QString end_file = "";
@@ -225,11 +225,12 @@ void MainWindow::on_searchButton_clicked()
         start_path = tempList[0];
         end_path = tempList[tempList.size() - 1];
         test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path, end_path);
-        //synchronizer.addFuture(test);
+        synchronizer.addFuture(test);
     }
+
     //test_place.waitForFinished();
     //test.waitForFinished();
-    //synchronizer.waitForFinished();
+    synchronizer.waitForFinished();
 
     //displayFilePaths(test.result(), ui);
 
