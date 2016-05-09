@@ -37,6 +37,7 @@ private slots:
 public slots:
     void add_to_stack(QString name);
 
+
 private:
     Ui::MainWindow *ui;
     MyDialogue *myDialogue;
