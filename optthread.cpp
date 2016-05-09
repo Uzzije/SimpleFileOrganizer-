@@ -144,3 +144,46 @@ std::stack<QString> optThread::set_up_thread_files( QString search_path, QString
   }
     return stack_of_files;
 }
+
+QList<QStringList> optThread::set_up_thread( QString search_path, int number_of_threads )
+{
+    QDir start_path = QDir( search_path ); // get initial start path
+    QString temp_path;
+    QFileInfoList entries = start_path.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot ); //get the list of directories in initial start path
+    QList<QStringList> all_file_path;
+    int index = entries.size()/number_of_threads; //get the count of how many directory will be worked on per thread (there might be remainders)
+    if (entries.size() < number_of_threads){ // if folder entries is less than the number of threads available to use
+        QStringList temp_list_single;
+        for(int big_entry = 0; big_entry < entries.size(); big_entry++){ // for each entry in start path
+            all_file_path.append(temp_list_single);
+            QFileInfo fileInfo = entries.at( big_entry ); //get the directory/file of each of its subdirectory by index
+            temp_path = fileInfo.filePath(); // get that subdirectory file/folder path
+            all_file_path[big_entry].append(temp_path); //assign each index of all_file_path a list object with exactly one element (file_path). Basically assigning one thread per folder
+          }
+        for(int rest = entries.size(); rest < number_of_threads; rest++){
+            all_file_path.append(temp_list_single);
+            all_file_path[rest].append("empty");
+        }
+     }
+    else{
+        int mul_path = 0;// If not the case that directories are more than folders from start path
+        for(int entry = 0; entry < number_of_threads; entry++){ // go through each index of all_path_files that we intend to create a list of file path in
+            QStringList temp_list;
+            int next = entry + 1;
+            for(;mul_path < (index*next); mul_path++){ // go through the first sets of file_path to allocate to the first index of all_file_path and so forth
+                temp_list.append(entries.at(mul_path).filePath()); // add those file paths to the index of all_file_path
+            }
+            all_file_path.append(temp_list);
+
+         }
+
+            if((index*number_of_threads) < entries.size()){ // check if there are left over files that we didn't grab i.e remainder of the index initialization above
+                QStringList temp_list_mod;
+                for(int start = (index*number_of_threads); start < entries.size(); start++){ // add the remainder file path to a new all_file_path index
+                    all_file_path[number_of_threads - 1].append(entries.at(start).filePath());
+                   }
+                //all_file_path[index].append( temp_list_mod ); // pass the remainder into a single index in the all_file_path index
+             }
+      }
+    return all_file_path;
+ }

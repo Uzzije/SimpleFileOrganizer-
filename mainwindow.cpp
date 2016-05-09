@@ -31,13 +31,18 @@
 #include "optthread.h"
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
+#include <QFutureSynchronizer>
 using namespace std;
 
 
 
 QString seconds = "not in stack";
 stack<QString> global_stack;
-int number_of_thread = 5;
+//stack<double> time_stack;
+int number_of_thread = 100;
+//clock_t begins = clock();
+//clock_t time_ends = clock();
+//double time_spents = 0.0;
 MainWindow::MainWindow( QWidget *parent ) :
     QMainWindow( parent ),
     ui( new Ui::MainWindow )
@@ -50,7 +55,7 @@ MainWindow::MainWindow( QWidget *parent ) :
             //ui->progressBar_2, SLOT(setValue(int)));
     //setCentralWidget(ui->plainTextEdit);
     //connect(ui->searchButton, SIGNAL(clicked()), ui->searchBar, SLOT(on_searchButton_clicked()));
-
+   // time_stack.push(time_spents);
 
 }
 
@@ -64,7 +69,7 @@ void MainWindow::on_actionNew_Window_2_triggered() //click a new window in menu
     MyDialogue MyDialogue( this );
     myDialogue->show();
 }
-
+/*
 QList<QStringList> set_up_thread( QString search_path, int number_of_threads )
 {
     QDir start_path = QDir( search_path ); // get initial start path
@@ -107,7 +112,7 @@ QList<QStringList> set_up_thread( QString search_path, int number_of_threads )
       }
     return all_file_path;
  }
-
+*/
 void MainWindow::on_fileView_clicked(const QModelIndex &index)
 {
     QString click_path = index.model()->data(index, Qt::DisplayRole).toString();
@@ -162,11 +167,19 @@ void createFolder( stack<QString> files, QDir dir )
         QFile::copy( src, dest + "/" + file_name );
     }
 }
+
 void MainWindow::add_to_stack(QString name){
 
     global_stack.push(name);
 
     displayFilePaths(global_stack, ui);
+    //ends = clock();
+
+    //time_spents = (double)(time_ends - begins) / CLOCKS_PER_SEC;
+    //time_spents = time_spents + time_stack.top();
+    //time_stack.pop();
+    //time_stack.push(time_spents);
+    //qDebug() << "File Name" << name;
 }
 
 void MainWindow::on_searchButton_clicked()
@@ -175,7 +188,7 @@ void MainWindow::on_searchButton_clicked()
     QDir dir;
     QString string, root;
     QMessageBox msgBox;
-    double time_spent;
+    double time_spent = 0.0;
     dirmodel = new QFileSystemModel( this );
     dirmodel->setRootPath( "/" );
     ui->treeView->setModel( dirmodel );
@@ -190,28 +203,39 @@ void MainWindow::on_searchButton_clicked()
     //QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot );
 
     QFuture<stack<QString>> test;
+    QFuture<stack<QString>> test_place;
     QFuture<QList<QStringList>> test_two;
     QString search_word = ui->searchBar->text();
-    QString searchPath = "/Users/Administrator/Desktop/";
+    QString searchPath = "/Users/Administrator/Desktop";
     QString start_path;
     QString end_path;
     QString end_file = "";
-    //test_two = QtConcurrent::run(&this->ptjob3, &optThread::set_up_thread)
-    QList<QStringList> listofpath = set_up_thread(searchPath, number_of_thread);
-    test = QtConcurrent::run(&this->ptjobs, &optThread::set_up_thread_files, searchPath, search_word);
+    QFutureSynchronizer<void> synchronizer;
+    QThreadPool::globalInstance()->setMaxThreadCount(30);
+    for(int x = 0; x < number_of_thread; x++){
+       test_two = QtConcurrent::run(&this->ptjob3, &optThread::set_up_thread, searchPath, number_of_thread);
+    }
+    //test_two.waitForFinished();
+    //synchronizer.addFuture(test_two);
+    QList<QStringList> listofpath = test_two.result();//set_up_thread(searchPath, number_of_thread);
+    test_place = QtConcurrent::run(&this->ptjobs, &optThread::set_up_thread_files, searchPath, search_word);
+    //synchronizer.addFuture(test_place);
     for(int x = 0; x < number_of_thread; x++){
         QStringList tempList = listofpath[x];
         start_path = tempList[0];
         end_path = tempList[tempList.size() - 1];
         test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path, end_path);
-
+        //synchronizer.addFuture(test);
     }
-
-    test.waitForFinished();
+    //test_place.waitForFinished();
     //test.waitForFinished();
-    displayFilePaths(test.result(), ui);
+    //synchronizer.waitForFinished();
+
+    //displayFilePaths(test.result(), ui);
 
     end = clock();
-    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    qDebug() << "Time is:" << time_spent;
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC + time_spent;
+
+   qDebug() << "Time is:" << time_spent;
+
 }
