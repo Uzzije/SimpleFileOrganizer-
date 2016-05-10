@@ -212,7 +212,7 @@ void MainWindow::on_searchButton_clicked()
     QFuture<stack<QString>> test_place;
     QFuture<QList<QStringList>> test_two;
     QString search_word = ui->searchBar->text();
-    QString searchPath = "/Users/Administrator/Desktop/";
+    QString searchPath = "/Users/Administrator/";
     QString start_path = "";
     QString end_path = "";
     //QString end_file = "";
