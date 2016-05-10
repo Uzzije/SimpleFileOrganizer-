@@ -230,14 +230,14 @@ void MainWindow::on_searchButton_clicked()
     */
     clock_t begin = clock(), end;
 
-    //for(int x = 0; x < number_of_thread; x++){
+    for(int x = 0; x < number_of_thread; x++){
         //QStringList tempList = listofpath[x];
         //start_path = tempList[0];
         //end_path = tempList[tempList.size() - 1];
         test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path, end_path);
         //synchronizer.addFuture(test);
         //synchronizer.setFuture(test);
-    //}
+    }
 
     //test_place.waitForFinished();
     test.waitForFinished();
