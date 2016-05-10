@@ -213,28 +213,31 @@ void MainWindow::on_searchButton_clicked()
     QFuture<QList<QStringList>> test_two;
     QString search_word = ui->searchBar->text();
     QString searchPath = "/Users/Administrator/Desktop/";
-    QString start_path;
-    QString end_path;
-    QString end_file = "";
+    QString start_path = "";
+    QString end_path = "";
+    //QString end_file = "";
+    /*
     QThreadPool::globalInstance()->setMaxThreadCount(30);
     for(int x = 0; x < number_of_thread; x++){
       test_two = QtConcurrent::run(&this->ptjob3, &optThread::set_up_thread, searchPath, number_of_thread);
     }
     test_two.waitForFinished();
     //synchronizer.addFuture(test_two);
+
     QList<QStringList> listofpath = test_two.result();//set_up_thread(searchPath, number_of_thread);
     test_place = QtConcurrent::run(&this->ptjobs, &optThread::set_up_thread_files, searchPath, search_word);
     //synchronizer.setFuture(test_place);
+    */
     clock_t begin = clock(), end;
 
-    for(int x = 0; x < number_of_thread; x++){
-        QStringList tempList = listofpath[x];
-        start_path = tempList[0];
-        end_path = tempList[tempList.size() - 1];
+    //for(int x = 0; x < number_of_thread; x++){
+        //QStringList tempList = listofpath[x];
+        //start_path = tempList[0];
+        //end_path = tempList[tempList.size() - 1];
         test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path, end_path);
         //synchronizer.addFuture(test);
         //synchronizer.setFuture(test);
-    }
+    //}
 
     //test_place.waitForFinished();
     test.waitForFinished();
