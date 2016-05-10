@@ -43,8 +43,8 @@ stack<QString> global_stack;
 int number_of_thread = QThread::idealThreadCount();
 clock_t begin_of_clock;
 clock_t end_of_clock;
-clock_t time_spent;
-QFutureWatcher<void> synchronizer;
+double time_spent;
+
 //double time_spents = 0.0;
 MainWindow::MainWindow( QWidget *parent ) :
     QMainWindow( parent ),
@@ -207,12 +207,12 @@ void MainWindow::on_searchButton_clicked()
 
     //QDir start_path = QDir( root );
     //QFileInfoList entries = start_path.entryInfoList( QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot );
-
+    QFutureSynchronizer<void> synchronizer;
     QFuture<stack<QString>> test;
     QFuture<stack<QString>> test_place;
     QFuture<QList<QStringList>> test_two;
     QString search_word = ui->searchBar->text();
-    QString searchPath = "/Users/Administrator/";
+    QString searchPath = "/Users/Administrator/Desktop/CIS 625";
     QString start_path = "";
     QString end_path = "";
     //QString end_file = "";
@@ -235,15 +235,15 @@ void MainWindow::on_searchButton_clicked()
         //start_path = tempList[0];
         //end_path = tempList[tempList.size() - 1];
         test = QtConcurrent::run(&this->ptjob, &optThread::start, searchPath, search_word, start_path, end_path);
-        //synchronizer.addFuture(test);
+        synchronizer.addFuture(test);
         //synchronizer.setFuture(test);
     }
 
     //test_place.waitForFinished();
     test.waitForFinished();
-    //synchronizer.waitForFinished();
+    synchronizer.waitForFinished();
 
-    //displayFilePaths(test.result(), ui);
+    displayFilePaths(test.result(), ui);
 
     end = clock();
     time_spent = (double)(end - begin) / CLOCKS_PER_SEC;

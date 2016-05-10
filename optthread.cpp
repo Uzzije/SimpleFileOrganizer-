@@ -49,14 +49,14 @@ std::stack<QString> optThread::start(QString search_path, QString search_word, Q
 
     QDir start_path = QDir( search_path ); //Initialize directory object to investigated directories content
     QDirIterator it(search_path, QDir::Files, QDirIterator::Subdirectories);
-    //stack<QString> new_stack;
+    std::stack<QString> new_stack;
 
     //QString string_word = ui->searchBar->text();
     while (it.hasNext()){
-        //new_stack.push(it.next());
+        new_stack.push(it.next());
         if( it.next().contains( search_word, Qt::CaseInsensitive ) ){
             //qDebug() << it.next();
-            emit on_find(it.next());//displayFilePaths(new_stack, ui);
+            //emit on_find(it.next());//displayFilePaths(new_stack, ui);
         }
 
     }
@@ -137,7 +137,7 @@ std::stack<QString> optThread::start(QString search_path, QString search_word, Q
         }
     }
     */
-    return stack_of_files;
+    return new_stack;
 }
 std::stack<QString> optThread::set_up_thread_files( QString search_path, QString search_word){
     qDebug() << "Currently On:" << thread()->currentThreadId();
